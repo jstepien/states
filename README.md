@@ -2,6 +2,8 @@
 
 Property-based generative testing for stateful computations in Clojure.
 
+[![Build Status](https://travis-ci.org/jstepien/states.svg)](https://travis-ci.org/jstepien/states)
+
 ## Example: `java.util.Set`
 
 In this example we will specify interactions with objects implementing the `Set`
