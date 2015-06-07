@@ -5,7 +5,7 @@
             [clojure.pprint :as pprint]))
 
 (defrecord Property
-  [commands precondition next-step postcondition init-state max-tries])
+  [commands next-step postcondition init-state])
 
 (defrecord Variable
   [v]
@@ -23,9 +23,9 @@
   (alter-meta! (resolve sym) assoc :private :yes-please))
 
 (defn- gen-command-with-state
-  [{:keys [commands next-step precondition max-tries]} state var]
-  (->> (gen/such-that #(precondition state %) (commands state) max-tries)
-       (gen/fmap #(vector % (next-step state var %)))))
+  [{:keys [commands next-step]} state var]
+  (gen/fmap #(vector % (next-step state var %))
+            (commands state)))
 
 (defn- gen-commands-from-state
   ([prop]
@@ -70,8 +70,6 @@
       generator of commands which can be executed in the given state. A command
       is a non-empty seq whose first argument is a resolvable symbol and others
       are variables passed to `next` or arbitrary values.
-    - `pre` takes 2 arguments: a current state and a command. It returns a
-      truthy value iff the command is legal in the current state.
     - `next` takes 3 arguments: a current state, a variable to which the result
       of the command was bound and the executed command. It returns the next
       state.
@@ -81,15 +79,11 @@
 
   Optional arguments are passed as a map. Allowed keys are:
 
-    - :init-state is the initial state.
-    - :max-tries is the maximum number of times a generator returned by
-      `commands` will be sampled until it returns a command satisfying `pre`.
-      Increase this value if `pre` is unlikely to be satisfied."
-  ([commands pre next post]
-   (run-commands commands pre next post {}))
-  ([commands pre next post {:keys [init-state max-tries]
-                            :or {max-tries 10, init-state {}}}]
-   (let [prop (->Property commands pre next post init-state max-tries)]
+    - :init-state is the initial state."
+  ([commands next post]
+   (run-commands commands next post {}))
+  ([commands next post {:keys [init-state] :or {init-state {}}}]
+   (let [prop (->Property commands next post init-state)]
      (prop/for-all
        [cmds (gen/fmap prettify-commands (gen-commands-from-state prop))]
        (reduce (partial run-step prop)

@@ -51,14 +51,6 @@ non-negative integers lesser than 10.
     (gen/return [`new-set class])))
 ```
 
-All commands we generate are legal irrespectively of the state.
-That's why the `precondition` function always returns `true`.
-
-```clojure
-(defn precondition [& _]
-  true)
-```
-
 The next state of our computation is determined by `next-step`, in which we
 manage a control set with all elements in the tested set and keep track of the
 variable with the tested set.
@@ -90,9 +82,9 @@ We define the initial state to contain an empty `:elems` control set.
 We decide to test `java.util.HashSet` by passing it as `:class`.
 
 ```clojure
-(quick-check 1000 (run-commands commands precondition next-step postcondition
+(quick-check 1000 (run-commands commands next-step postcondition
                                 {:init-state {:elems #{}
-                                              :class java.util.HashSet}})))
+                                              :class java.util.HashSet}}))
 ;; => {:result
 ;;     #<ExceptionInfo clojure.lang.ExceptionInfo: Postcondition unsatisfied
 ;;       {:set var-0, :elems #{8}, :class java.util.HashSet}>,
@@ -137,9 +129,9 @@ Let's correct this by adding another clause to `condp`.
 Let's retest the property.
 
 ```clojure
-(quick-check 1000 (run-commands commands precondition next-step postcondition
+(quick-check 1000 (run-commands commands next-step postcondition
                                 {:init-state {:elems #{}
-                                              :class java.util.HashSet}})))
+                                              :class java.util.HashSet}}))
 ;; => {:result true, :num-tests 100, :seed 1414360168056}
 ```
 

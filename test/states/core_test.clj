@@ -4,19 +4,16 @@
             [states.core :refer :all]))
 
 (defspec prop-vector-conj-pop-peek
-  (letfn [(commands [{:keys [vec]}]
-            (if vec
-              (gen/one-of [(gen/tuple (gen/return 'conj)
+  (letfn [(commands [{:keys [vec items]}]
+            (let [conj-gen (gen/tuple (gen/return 'conj)
                                       (gen/return vec)
-                                      gen/int)
-                           (gen/return ['pop vec])
-                           (gen/return ['peek vec])])
-              (gen/return '[vector])))
-          (precondition [{:keys [elems]} [fn & _]]
-            (case fn
-              pop (seq elems)
-              peek (seq elems)
-              true))
+                                      gen/int)]
+              (cond
+                (nil? vec)      (gen/return '[vector])
+                (empty? items)  conj-gen
+                :else           (gen/one-of [conj-gen
+                                             (gen/return ['pop vec])
+                                             (gen/return ['peek vec])]))))
           (next-step [state var [fn & args]]
             (case fn
               vector (assoc state :vec var)
@@ -32,8 +29,7 @@
               pop (every? true? (map = val (reverse elems)))
               peek (some #{val} elems)
               true))]
-    (run-commands commands precondition next-step postcondition
-      {:max-tries 50})))
+    (run-commands commands next-step postcondition)))
 
 (defn ^:private java-hash-set []
   (java.util.HashSet.))
@@ -57,8 +53,6 @@
                 (gen/one-of [gen/int
                              (gen/elements (cons 0 items))]))
               (gen/return `[java-hash-set])))
-          (precondition [& _]
-            true)
           (next-step [state var [fn & args]]
             (condp = fn
               `java-hash-set (assoc state :set var :items #{})
@@ -69,4 +63,4 @@
             (if (= fn `java-contains)
               (= val (contains? items (second args)))
               true))]
-    (run-commands commands precondition next-step postcondition)))
+    (run-commands commands next-step postcondition)))
