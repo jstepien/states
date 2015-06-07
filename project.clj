@@ -4,4 +4,4 @@
   :license {:name "MIT License"
             :url "https://git.io/3xfEyA"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/test.check "0.5.9"]])
+                 [org.clojure/test.check "0.7.0"]])
