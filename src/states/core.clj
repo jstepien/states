@@ -29,20 +29,18 @@
 
 (defn- gen-commands-from-state
   ([prop]
-   (gen/bind (gen/fmap #(int (Math/sqrt %)) gen/nat)
-             (partial gen-commands-from-state prop (:init-state prop) 0)))
-  ([prop state var-count length]
+   (gen-commands-from-state prop (:init-state prop) 0))
+  ([prop state var-count]
    (let [gen (gen-command-with-state prop state (->Variable var-count))]
-     (if-not (pos? length)
-       (gen/fmap #(subvec % 0 1) gen)
-       (gen/bind
-         gen
-         (fn [[cmd state']]
-           (gen/fmap (partial cons cmd)
-                     (gen-commands-from-state prop
-                                              state'
-                                              (inc var-count)
-                                              (dec length)))))))))
+     (gen/one-of
+       [(gen/fmap #(subvec % 0 1) gen)
+        (gen/bind
+          gen
+          (fn [[cmd state']]
+            (gen/fmap (partial cons cmd)
+                      (gen-commands-from-state prop
+                                               state'
+                                               (inc var-count)))))]))))
 
 (defn- run-step
   [{:keys [next-step postcondition]} state step]
