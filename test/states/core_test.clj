@@ -3,14 +3,14 @@
             [clojure.test.check.generators :as gen]
             [states.core :refer :all]))
 
-(defspec prop-vector-conj-pop-peek
-  (letfn [(commands [{:keys [vec items]}]
+(defspec prop-vector-conj-pop-peek 1000
+  (letfn [(commands [{:keys [vec elems]}]
             (let [conj-gen (gen/tuple (gen/return 'conj)
                                       (gen/return vec)
                                       gen/int)]
               (cond
                 (nil? vec)      (gen/return '[vector])
-                (empty? items)  conj-gen
+                (empty? elems)  conj-gen
                 :else           (gen/one-of [conj-gen
                                              (gen/return ['pop vec])
                                              (gen/return ['peek vec])]))))
@@ -42,7 +42,7 @@
 
 (def-java-methods [add contains remove])
 
-(defspec prop-java-hash-set
+(defspec prop-java-hash-set 1000
   (letfn [(commands [{:keys [set items]}]
             (if set
               (gen/tuple
