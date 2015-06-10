@@ -140,6 +140,7 @@ It works; The property is now satisfied.
 ## Related work
 
   - [QuviQ eqc](http://www.quviq.com/)
+  - [czan/stateful-check](https://github.com/czan/stateful-check)
 
 ## License
 
