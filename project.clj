@@ -1,4 +1,4 @@
-(defproject states "0.1.0"
+(defproject states "0.1.1-SNAPSHOT"
   :description "Property-based generattive testing for stateful computations"
   :url "https://github.com/jstepien/states"
   :license {:name "MIT License"
